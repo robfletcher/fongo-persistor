@@ -20,7 +20,7 @@ class FongoPersistor extends BusModBase implements Handler<Message<JsonObject>> 
 	private MongoPersistor delegate = new MongoPersistor()
 
 	FongoPersistor() {
-		fongo = new Fongo('fongo server')
+		fongo = new Fongo('fongo server', true)
 		db = fongo.getDB(dbName)
 
 //		delegate.@mongo = fongo.mongo

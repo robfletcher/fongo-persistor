@@ -2,22 +2,26 @@ apply plugin: 'groovy'
 apply plugin: 'idea'
 
 repositories {
-    mavenCentral()
-    flatDir { dirs "lib" }
-    flatDir { dirs "${vertxHome}/lib/jars" }
-    flatDir { dirs "${vertxHome}/mods/mongo-persistor/lib" }
+	mavenCentral()
+	flatDir { dirs "lib" }
+	flatDir { dirs "${vertxHome}/lib/jars" }
+	flatDir { dirs "${vertxHome}/mods/mongo-persistor/lib" }
 }
 
 dependencies {
-    groovy 'org.codehaus.groovy:groovy:1.8.6'
+	groovy 'org.codehaus.groovy:groovy:1.8.6'
+
 	compile ':fongo'
 	compile ':mongo'
 	compile ':vert.x-core'
 	compile ':vert.x-platform'
-    compile 'org.spockframework:spock-core:0.6-groovy-1.8'
 	compile files("${vertxHome}/mods/mongo-persistor")
+
 	runtime ':netty'
 	runtime 'org.mockito:mockito-core:1.9.0'
+
+	testCompile 'org.spockframework:spock-core:0.6-groovy-1.8'
+
 	testRuntime ':jackson-core'
 	testRuntime ':jackson-mapper'
 }
@@ -25,6 +29,31 @@ dependencies {
 sourceCompatibility = '1.7'
 targetCompatibility = '1.7'
 
+def vertxModsDir = System.getenv()['VERTX_MODS']
+def modsDir = vertxModsDir ? "$vertxModsDir/$project.name" : "$buildDir/mods/$project.name"
+
+task installClasses(type: Sync) {
+	from compileGroovy
+	from 'src/main/groovy'
+	from 'src/main/resources'
+	from(configurations.runtime) {
+		include '**/*.class'
+	}
+	into modsDir
+}
+
+task installLibs(type: Sync) {
+	// this is hacky - should I be using separate configrations?
+	from(configurations.runtime.files { !(it.name in ['groovy', 'vert.x-core', 'vert.x-platform', 'netty']) }) {
+		include '*.jar'
+	}
+	into "$modsDir/lib"
+}
+
+task install {
+	dependsOn 'installClasses', 'installLibs'
+}
+
 task wrapper(type: Wrapper) {
-    gradleVersion = '1.0-rc-3'
+	gradleVersion = '1.0-rc-3'
 }
