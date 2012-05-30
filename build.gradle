@@ -17,11 +17,11 @@ dependencies {
 	compile ':vert.x-platform'
 	compile files("${vertxHome}/mods/mongo-persistor")
 
-	runtime ':netty'
 	runtime 'org.mockito:mockito-core:1.9.0'
 
 	testCompile 'org.spockframework:spock-core:0.6-groovy-1.8'
 
+	testRuntime ':netty'
 	testRuntime ':jackson-core'
 	testRuntime ':jackson-mapper'
 }
@@ -44,7 +44,7 @@ task installClasses(type: Sync) {
 
 task installLibs(type: Sync) {
 	// this is hacky - should I be using separate configrations?
-	from(configurations.runtime.files { !(it.name in ['groovy', 'vert.x-core', 'vert.x-platform', 'netty']) }) {
+	from(configurations.runtime.files { !(it.name in ['groovy', 'vert.x-core', 'vert.x-platform']) }) {
 		include '*.jar'
 	}
 	into "$modsDir/lib"
