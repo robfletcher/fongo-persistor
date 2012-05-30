@@ -1,0 +1,4 @@
+{
+  "main": "co.freeside.vertx.fongo.FongoPersistor",
+  "worker": true
+}
