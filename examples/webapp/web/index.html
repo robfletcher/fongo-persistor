@@ -13,29 +13,24 @@
 
   <div class="sidebar">
     <div class="well">
-      <h2>Order total:</h2>
-
-      <h2><strong data-bind="text:total"></strong></h2>
+      <h2>Order total: <strong data-bind="text:total"></strong></h2>
     </div>
 
     <form class="form-stacked">
       <label for="username">Username</label>
-      <input type="text" id="username" class="span2"
+      <input type="text" id="username" name="username" class="span2"
              data-bind="value: username"/>
       <label for="password">Password</label>
-      <input type="password" id="password" class="span2"
+      <input type="password" id="password" name="password" class="span2"
              data-bind="value: password"/>
       <br><br>
-      <input type="submit" class="btn primary" value="Login"
-             data-bind="click: login"/>
+      <button type="submit" class="btn primary" data-bind="click: login">Login</button>
     </form>
 
     <br>
 
     <div data-bind="visible: sessionID() != ''">
-      <h3>Logged in as</h3>
-
-      <h3><strong data-bind="text: username"></strong></h3>
+      <h3>Logged in as <strong data-bind="text: username"></strong></h3>
     </div>
 
   </div>

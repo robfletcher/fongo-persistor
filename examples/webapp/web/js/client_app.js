@@ -17,7 +17,7 @@
 (function DemoViewModel() {
 
   var that = this;
-  var eb = new vertx.EventBus('https://localhost:8080/eventbus');
+  var eb = new vertx.EventBus('http://localhost:8080/eventbus');
   that.items = ko.observableArray([]);
 
   eb.onopen = function() {

@@ -54,6 +54,10 @@ task install {
 	dependsOn 'installClasses', 'installLibs'
 }
 
+task testExample(type: Exec) {
+	commandLine 'casperjs', 'test', 'src/test/casper', "--xunit=$testResultsDir/casper-suite.xml"
+}
+
 task wrapper(type: Wrapper) {
 	gradleVersion = '1.0-rc-3'
 }
