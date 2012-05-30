@@ -23,7 +23,6 @@ class FongoPersistor extends BusModBase implements Handler<Message<JsonObject>> 
 		fongo = new Fongo('fongo server', true)
 		db = fongo.getDB(dbName)
 
-//		delegate.@mongo = fongo.mongo
 		delegate.@db = db
 
 		logger = new Logger(new JULLogDelegate(FongoPersistor.name))
@@ -35,6 +34,8 @@ class FongoPersistor extends BusModBase implements Handler<Message<JsonObject>> 
 
 		address = getOptionalStringConfig("address", "vertx.mongopersistor");
 		dbName = getOptionalStringConfig("db_name", "default_db");
+
+		eb.registerHandler(address, this)
 	}
 
 	@Override
