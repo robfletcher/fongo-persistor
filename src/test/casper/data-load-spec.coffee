@@ -4,7 +4,7 @@ getAlbums = ->
 
 albums = []
 
-casper.start 'http://localhost:8080/index.html', ->
+casper.start 'https://localhost:8080/index.html', ->
     @waitForSelector '#shop table tbody tr:nth-child(4)', ->
         albums = @evaluate getAlbums
         @test.assertEquals albums[0], 'I Am A Cider Drinker', 'album title is correct'

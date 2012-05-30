@@ -27,7 +27,7 @@ def webServerConf = [
 
   port: 8080,
   host: 'localhost',
-  ssl: false,
+  ssl: true,
 
   // Configuration for the event bus client side bridge
   // This bridges messages from the client side to the server side event bus

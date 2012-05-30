@@ -51,13 +51,18 @@ task installLibs(type: Sync) {
 }
 
 task install {
+	description 'Installs the busmod to the $VERTX_MODS directory'
 	dependsOn 'installClasses', 'installLibs'
 }
 
-task testExample(type: Exec) {
-	commandLine 'casperjs', 'test', 'src/test/casper', "--xunit=$testResultsDir/casper-suite.xml"
+task runExample(type: Exec) {
+	dependsOn 'install'
+
+	workingDir "$projectDir/examples/webapp"
+	commandLine 'vertx', 'run', 'App.groovy'
 }
 
-task wrapper(type: Wrapper) {
-	gradleVersion = '1.0-rc-3'
+task testExample(type: Exec) {
+	description 'Runs functional tests against the example project.'
+	commandLine 'casperjs', 'test', 'src/test/casper', "--xunit=$testResultsDir/casper-suite.xml", '--ignore-ssl-errors=yes'
 }

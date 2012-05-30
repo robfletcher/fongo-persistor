@@ -1,4 +1,4 @@
-casper.start 'http://localhost:8080/index.html', ->
+casper.start 'https://localhost:8080/index.html', ->
     @waitForSelector '#shop table tbody tr:nth-child(4)', ->
         @click '#shop tr:nth-child(3) a'
         @test.assertEquals @fetchText('.sidebar h2'), 'Order total: $0.50', 'order total is displayed'
