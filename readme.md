@@ -1,5 +1,6 @@
 This is a [Vert.x][vertx] busmod providing a [Fongo][fongo] database. The primary intention is for replacing a real
-Mongo persistor busmod on the event bus in unit tests.
+Mongo persistor busmod on the event bus in Java or Groovy unit tests. However, it is also possible to deploy as in a
+Vert.x container just like any other busmod.
 
 ## Installing
 
@@ -44,6 +45,19 @@ Embedded Vert.x][blog]).
 
 The Fongo Persistor needs to be installed in `VERTX_MODS` then you can simply register it as you would any other busmod
 using `deployVerticle('fongo-persistor')`
+
+## Example app
+
+There is an example app in `examples/webapp`. This is simply the standard Vert.x webapp example but using a _fongo-persistor_
+instead of a _mongo-persistor_.
+
+To run the example ensure that you have the `VERTX_MODS` environment variable set, then:
+
+	./gradlew install
+	cd examples/web-app
+	vertx run App.groovy
+
+then point your browser at `https://localhost:8080/index.html`
 
 [vertx]:http://vertx.io
 [fongo]:https://github.com/foursquare/fongo
