@@ -5,3 +5,9 @@ See the tests for examples of usage.
 
 [vertx]:http://vertx.io
 [fongo]:https://github.com/foursquare/fongo
+
+## To-do
+
+- make the busmod deployable (currently only works embedded)
+- set up example app that uses fongo in place of mongo
+- get gradle build to package everything up as a busmod zip (currently tedious manual jar copying is needed)
