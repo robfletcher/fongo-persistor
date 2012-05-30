@@ -45,8 +45,9 @@ class FongoPersistorSpec extends Specification {
 		vertx.eventBus.send 'mongo.persistor', [action: 'findone', collection: 'pirates', match: [nomDeGuerre: 'Blackbeard']], reply.&set
 
 		then:
-		reply.get().body.status == 'ok'
-		reply.get().body.result.name == document.name
+		def msg = reply.get()
+		msg.body.status == 'ok'
+		msg.body.result.name == document.name
 	}
 
 }
