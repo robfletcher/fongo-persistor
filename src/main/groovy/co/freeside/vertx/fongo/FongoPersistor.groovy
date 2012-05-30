@@ -6,34 +6,37 @@ import org.vertx.java.busmods.BusModBase
 import org.vertx.java.core.Handler
 import org.vertx.java.core.eventbus.Message
 import org.vertx.java.core.json.JsonObject
-import org.vertx.mods.MongoPersistor
 import org.vertx.java.core.logging.Logger
 import org.vertx.java.core.logging.impl.JULLogDelegate
+import org.vertx.mods.MongoPersistor
 
 class FongoPersistor extends BusModBase implements Handler<Message<JsonObject>> {
 
-	private String address
-	private String dbName
+	boolean debug = true
+	String address = 'vertx.mongopersistor'
+	String dbName = 'default_db'
 
 	private Fongo fongo
 	private DB db
 	private MongoPersistor delegate = new MongoPersistor()
 
-	FongoPersistor() {
-		fongo = new Fongo('fongo server', true)
-		db = fongo.getDB(dbName)
-
-		delegate.@db = db
-
-		logger = new Logger(new JULLogDelegate(FongoPersistor.name))
-	}
-
 	@Override
 	void start() {
-		super.start()
+		if (container) {
+			super.start()
+			address = getOptionalStringConfig('address', 'vertx.mongopersistor');
+			dbName = getOptionalStringConfig('db_name', 'default_db');
+		} else {
+			// we are outside the container, e.g. embedded
+			eb = vertx.eventBus()
+			logger = new Logger(new JULLogDelegate(FongoPersistor.name))
+		}
 
-		address = getOptionalStringConfig("address", "vertx.mongopersistor");
-		dbName = getOptionalStringConfig("db_name", "default_db");
+		fongo = new Fongo('fongo server', debug)
+		db = fongo.getDB(dbName)
+
+		// hack the private field on the delegate to inject the fongo db instead of a real mongo one
+		delegate.@db = db
 
 		eb.registerHandler(address, this)
 	}
@@ -43,15 +46,17 @@ class FongoPersistor extends BusModBase implements Handler<Message<JsonObject>> 
 		delegate.handle(message)
 	}
 
+	/**
+	 * Overloads the handle method so this busmod can directly handle Groovy messages.
+	 */
 	void handle(org.vertx.groovy.core.eventbus.Message message) {
 		delegate.handle(message.@jMessage)
 	}
 
-	String getAddress() {
-		address
-	}
-
-	DB getDB() {
+	/**
+	 * To allow tests access to the underlying database.
+	 */
+	DB getDb() {
 		db
 	}
 }

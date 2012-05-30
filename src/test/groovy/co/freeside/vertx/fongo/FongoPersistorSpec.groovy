@@ -1,17 +1,23 @@
 package co.freeside.vertx.fongo
 
-import co.freeside.vertx.spock.VertxHandler
+import com.mongodb.BasicDBObject
 import org.vertx.groovy.core.Vertx
 import org.vertx.groovy.core.eventbus.Message
 import spock.util.concurrent.BlockingVariable
-import com.mongodb.*
 import spock.lang.*
 
+/**
+ * This spec demonstrates using _fongo-persistor_ as a collaborator when testing your own event bus components.
+ */
 class FongoPersistorSpec extends Specification {
 
 	@Shared Vertx vertx = Vertx.newVertx()
-	@VertxHandler(address = 'mongo.persistor') def persistor = new FongoPersistor()
-	DB db = persistor.getDB()
+	def persistor = new FongoPersistor()
+
+	void setup() {
+		persistor.vertx = vertx.toJavaVertx()
+		persistor.start()
+	}
 
 	void 'can save to a fongo database'() {
 		given:
@@ -19,13 +25,13 @@ class FongoPersistorSpec extends Specification {
 
 		when:
 		def document = [name: 'Edward Teach', nomDeGuerre: 'Blackbeard', vessel: 'Queen Anne\'s Revenge']
-		vertx.eventBus.send 'mongo.persistor', [action: 'save', collection: 'pirates', document: document], reply.&set
+		vertx.eventBus.send persistor.address, [action: 'save', collection: 'pirates', document: document], reply.&set
 
 		then:
 		reply.get().body.status == 'ok'
 
 		and:
-		def collection = db.getCollection('pirates')
+		def collection = persistor.db.getCollection('pirates')
 		collection.count() == 1
 		def row = collection.findOne()
 		row.get('name') == document.name
@@ -36,13 +42,13 @@ class FongoPersistorSpec extends Specification {
 	void 'can find in a fongo database'() {
 		given:
 		def document = new BasicDBObject(name: 'Edward Teach', nomDeGuerre: 'Blackbeard', vessel: 'Queen Anne\'s Revenge')
-		db.getCollection('pirates').insert(document)
+		persistor.db.getCollection('pirates').insert(document)
 
 		and:
 		def reply = new BlockingVariable<Message>()
 
 		when:
-		vertx.eventBus.send 'mongo.persistor', [action: 'findone', collection: 'pirates', match: [nomDeGuerre: 'Blackbeard']], reply.&set
+		vertx.eventBus.send persistor.address, [action: 'findone', collection: 'pirates', match: [nomDeGuerre: 'Blackbeard']], reply.&set
 
 		then:
 		def msg = reply.get()
