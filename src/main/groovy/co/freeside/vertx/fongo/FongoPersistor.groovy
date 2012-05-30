@@ -3,12 +3,12 @@ package co.freeside.vertx.fongo
 import com.foursquare.fongo.Fongo
 import com.mongodb.DB
 import org.vertx.java.busmods.BusModBase
-import org.vertx.java.core.Handler
 import org.vertx.java.core.eventbus.Message
 import org.vertx.java.core.json.JsonObject
 import org.vertx.java.core.logging.Logger
 import org.vertx.java.core.logging.impl.JULLogDelegate
 import org.vertx.mods.MongoPersistor
+import org.vertx.java.core.*
 
 class FongoPersistor extends BusModBase implements Handler<Message<JsonObject>> {
 
@@ -19,6 +19,7 @@ class FongoPersistor extends BusModBase implements Handler<Message<JsonObject>> 
 	private Fongo fongo
 	private DB db
 	private MongoPersistor delegate = new MongoPersistor()
+	private String eventBusId
 
 	@Override
 	void start() {
@@ -38,7 +39,12 @@ class FongoPersistor extends BusModBase implements Handler<Message<JsonObject>> 
 		// hack the private field on the delegate to inject the fongo db instead of a real mongo one
 		delegate.@db = db
 
-		eb.registerHandler(address, this)
+		eventBusId = eb.registerHandler(address, this)
+	}
+
+	@Override
+	void stop() {
+		eb.unregisterHandler(eventBusId)
 	}
 
 	@Override

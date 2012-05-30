@@ -19,6 +19,10 @@ class FongoPersistorSpec extends Specification {
 		persistor.start()
 	}
 
+	void cleanup() {
+		persistor.stop()
+	}
+
 	void 'can save to a fongo database'() {
 		given:
 		def reply = new BlockingVariable<Message>()
