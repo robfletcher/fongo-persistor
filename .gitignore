@@ -1,6 +1,11 @@
-/build
+# machine specific config
 /gradle.properties
-/.gradle
+
+# gradle output
+build
+.gradle
+
+# intellij artifacts
 /*.ipr
 /*.iml
 /*.iws

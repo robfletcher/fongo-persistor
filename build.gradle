@@ -58,11 +58,26 @@ task install {
 task runExample(type: Exec) {
 	dependsOn 'install'
 
-	workingDir "$projectDir/examples/webapp"
-	commandLine 'vertx', 'run', 'App.groovy'
+	workingDir "$projectDir/examples"
+	commandLine 'vertx', 'run', 'webapp/App.groovy'
 }
 
-task testExample(type: Exec) {
-	description 'Runs functional tests against the example project.'
-	commandLine 'casperjs', 'test', 'src/test/casper', "--xunit=$testResultsDir/casper-suite.xml", '--ignore-ssl-errors=yes'
+task integrationTest(type: Exec) {
+	description 'Runs integration tests against the example project.'
+
+	commandLine 'casperjs', 'test', '.', "--xunit=$testResultsDir/TEST-casper-suite.xml", '--ignore-ssl-errors=yes'
+	workingDir = 'src/test/casper'
+
+	gradle.addListener(new TaskExecutionListener() {
+		void beforeExecute(Task task) {}
+		void afterExecute(Task task, TaskState taskState) {
+			if (task.name == 'integrationTest') {
+				def reporter = new co.freeside.gradle.CasperTestReport()
+				reporter.testResultsDir = task.project.testResultsDir
+				reporter.testReportDir = task.project.testReportDir
+				reporter.generateReport()
+			}
+		}
+	})
 }
+
