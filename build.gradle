@@ -62,22 +62,42 @@ task runExample(type: Exec) {
 	commandLine 'vertx', 'run', 'webapp/App.groovy'
 }
 
-task integrationTest(type: Exec) {
+task integrationTest(type: CasperTask) {
 	description 'Runs integration tests against the example project.'
+}
 
-	commandLine 'casperjs', 'test', '.', "--xunit=$testResultsDir/TEST-casper-suite.xml", '--ignore-ssl-errors=yes'
-	workingDir = 'src/test/casper'
+class CasperTask extends DefaultTask implements VerificationTask {
 
-	gradle.addListener(new TaskExecutionListener() {
-		void beforeExecute(Task task) {}
-		void afterExecute(Task task, TaskState taskState) {
-			if (task.name == 'integrationTest') {
-				def reporter = new co.freeside.gradle.CasperTestReport()
-				reporter.testResultsDir = task.project.testResultsDir
-				reporter.testReportDir = task.project.testReportDir
-				reporter.generateReport()
-			}
+	File testSrcDir = new File('src/test/casper')
+	File testResultsDir = project.testResultsDir
+	File testReportDir = project.testReportDir
+	boolean ignoreFailures = false
+
+	@TaskAction
+	def casperjs() {
+		def resultFile = new File(project.testResultsDir, 'TEST-casper-suite.xml')
+		def result = project.exec {
+			ignoreExitValue = true
+			workingDir = testSrcDir
+			commandLine 'casperjs', 'test', '.', "--xunit=$resultFile", '--ignore-ssl-errors=yes'
 		}
-	})
+
+		// hack timing info into report XML otherwise Gradle's DefaultTestReport class will throw NPE
+		def testsuite = new XmlParser().parse(resultFile)
+		for (testcase in testsuite.testcase) {
+			testcase.@time = '0'
+		}
+		resultFile.withWriter { writer ->
+			new XmlNodePrinter(new PrintWriter(writer)).print(testsuite)
+		}
+
+		// generate test report
+		def reporter = new org.gradle.api.internal.tasks.testing.junit.report.DefaultTestReport()
+		reporter.testResultsDir = testResultsDir
+		reporter.testReportDir = testReportDir
+		reporter.generateReport()
+
+		if (!ignoreFailures) result.assertNormalExitValue()
+	}
 }
 
